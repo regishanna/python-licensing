@@ -48,7 +48,7 @@ def check_license(license_hash, key):
     bool: True if the license is valid, False otherwise.
     """
     cur = get_connection().cursor()
-    cur.execute("SELECT * FROM licenses WHERE activation_key = %s",
+    cur.execute("SELECT * FROM licenses WHERE activation_key = ?",
                 (key,))
     result = cur.fetchone()
 
