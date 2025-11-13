@@ -146,11 +146,11 @@ def main():
                         action='store_true',
                         help='Initialize the database')
     parser.add_argument('--add',
-                        metavar='ENTRY',
+                        metavar='FIELD',
                         nargs='+',  # accept multiple arguments separated by space
                         type=parse_add_arg, # use the conversion function
                         help='''Add an entry to the database.
-                        Example: --add "expires_after=2024-02-01 comment=my_comment"''')
+                        Example: --add expires_after=2024-02-01 comment="this is a beautiful entry"''')
     parser.add_argument('--remove',
                         metavar='ID',
                         type=int,
