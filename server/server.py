@@ -4,16 +4,13 @@ This module defines a Flask application that provides a license checking service
 The application exposes a single endpoint, /check_license, which accepts GET requests.
 The endpoint expects two parameters, 'hash' and 'key', which represent a license 
 hash and key respectively.
-The application checks the provided license against a PostgreSQL database and
+The application checks the provided license against a database and
 returns whether the license is valid.
 
 The database connection parameters are read from environment variables:
 - DB_NAME: The name of the database.
 - DB_USER: The username to connect to the database.
 - DB_PASS: The password to connect to the database.
-
-The application is served over HTTPS. The SSL certificate and key are read
-from 'cert.pem' and 'key.pem' respectively.
 """
 
 import os
@@ -38,7 +35,7 @@ def check_license(license_hash, key):
     Check if a license is valid.
 
     This function checks if a license, represented by a hash and a key, is valid.
-    It does this by querying a PostgreSQL database.
+    It does this by querying a database.
 
     Parameters:
     hash (str): The hash of the license.
@@ -89,7 +86,7 @@ if __name__ == '__main__':
 
     if os.getenv('ENVIRONMENT', 'production') == 'development':
         print("Running in development mode.")
-        app.run(ssl_context=('cert.pem', 'key.pem'), host='0.0.0.0')
+        app.run(host='0.0.0.0')
     else:
         print("Running in production mode.")
-        serve(app, host="0.0.0.0", port=os.getenv('LICENSE_PORT', '5000'), threads=4)
+        serve(app, host="localhost", port=os.getenv('LICENSE_PORT', '5000'), threads=4)

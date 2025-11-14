@@ -31,7 +31,7 @@ def connect_to_db():
         password=os.getenv('DB_PASS', 'database_password'),
         host=os.getenv('DB_HOST', 'localhost'),
         port=int(os.getenv('DB_PORT', '3306')),
-        database=os.getenv('DB_NAME', 'database_name')
+        database=os.getenv('DB_NAME', 'licences')
     )
     conn.autocommit = True  # enables autocommit
     return conn
