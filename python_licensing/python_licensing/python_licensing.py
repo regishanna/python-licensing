@@ -48,7 +48,6 @@ def licensed(server_url):
                         'hash': unique_hash,
                         'key': activation_key
                         },
-                    verify=False,
                     timeout=20)
                 if response.status_code == 200 and response.json()['valid']:
                     return func(*args, **kwargs)
