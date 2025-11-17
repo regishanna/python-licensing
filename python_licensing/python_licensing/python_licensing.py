@@ -56,7 +56,6 @@ def licensed(server_url):
             except requests.exceptions.RequestException as e:
                 print(f"An error occurred: {e}")
             print("Invalid license or unable to reach the licensing server.")
-            input("Press any key to exit.")
             return None
         return wrapper
     return decorator
