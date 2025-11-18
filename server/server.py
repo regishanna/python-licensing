@@ -23,32 +23,28 @@ from server_tools import initialize_db, connect_to_db
 
 
 app = Flask(__name__)
-_conn = None  # pylint: disable=invalid-name
 
 
 def get_connection():
     """
     Return the database connection.
     """
-    global _conn  # pylint: disable=global-statement
-    if _conn is None:
-        _conn = connect_to_db()
-    return _conn
+    return connect_to_db()
 
-def update_timestamp(key, ts_name):
+def update_timestamp(conn, key, ts_name):
     """
     Update timestamp of a licence record given the key and
     the name of the timestamp field to be updated
     """
-    cur = get_connection().cursor()
+    cur = conn.cursor()
     cur.execute(f"UPDATE licenses SET {ts_name}=? WHERE activation_key=?",
                 (datetime.now(), key))
 
-def activate_licence(key, hash):
+def activate_licence(conn, key, hash):
     """
     Activate a licence by storing the received hash
     """
-    cur = get_connection().cursor()
+    cur = conn.cursor()
     cur.execute(f"UPDATE licenses SET hash=?, activated_on=? WHERE activation_key=?",
                 (hash, datetime.now(), key))
 
@@ -70,7 +66,8 @@ def check_license(license_hash, key):
     if (key is None) or (license_hash is None):
         return False
 
-    cur = get_connection().cursor()
+    conn = get_connection()
+    cur = conn.cursor()
 
     # check key
     cur.execute("SELECT expires_after,hash FROM licenses WHERE activation_key=?",
@@ -85,22 +82,22 @@ def check_license(license_hash, key):
 
     # check expiration
     if (expires_after is not None) and (datetime.now() > expires_after):
-        update_timestamp(key, "checked_nok_on")
+        update_timestamp(conn, key, "checked_nok_on")
         return False
 
     # check if the licence is already activated by hash presence in database
     if db_hash is None:
         # not activated, activate the licence
-        activate_licence(key, license_hash)
+        activate_licence(conn, key, license_hash)
     else:
         # licence already activated, check hash
         if license_hash != db_hash:
             # bad hash
-            update_timestamp(key, "checked_nok_on")
+            update_timestamp(conn, key, "checked_nok_on")
             return False
 
     # all checks are OK
-    update_timestamp(key, "checked_ok_on")
+    update_timestamp(conn, key, "checked_ok_on")
     return True
 
 @app.route('/check_license', methods=['GET'])
