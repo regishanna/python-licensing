@@ -33,29 +33,43 @@ def get_activation_key():
             f.write(key)
         return key
 
+def check_license(server_url, timeout=5):
+    """
+    Check the license validity with the licensing server.
+    """
+    unique_hash = generate_unique_hash()
+    activation_key = get_activation_key()
+    try:
+        response = requests.get(
+            server_url + '/check_license',
+            params={
+                'hash': unique_hash,
+                'key': activation_key
+                },
+            timeout=timeout)
+        status = response.status_code
+        if status != 200:
+            print(f"License server at {server_url} returned status code {status}.")
+        elif response.json()['valid'] != True:
+            print(f"License with key {activation_key} and hash {unique_hash} is not valid.")
+        else:
+            return True
+    except requests.exceptions.Timeout:
+        print(f"The request to the license server {server_url} timed out.")
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred when requesting the license server at {server_url}: {e}")
+    return False
+
 def licensed(server_url):
     """
     Decorator function to check the license before executing a function.
     """
     def decorator(func):
         def wrapper(*args, **kwargs):
-            unique_hash = generate_unique_hash()
-            activation_key = get_activation_key()
-            try:
-                response = requests.get(
-                    server_url + '/check_license',
-                    params={
-                        'hash': unique_hash,
-                        'key': activation_key
-                        },
-                    timeout=20)
-                if response.status_code == 200 and response.json()['valid']:
-                    return func(*args, **kwargs)
-            except requests.exceptions.Timeout:
-                print("The request to the licensing server timed out.")
-            except requests.exceptions.RequestException as e:
-                print(f"An error occurred: {e}")
-            print("Invalid license or unable to reach the licensing server.")
-            return None
+            if check_license(server_url):
+                return func(*args, **kwargs)
+            else:
+                print("License check failed.")
+                return None
         return wrapper
     return decorator
