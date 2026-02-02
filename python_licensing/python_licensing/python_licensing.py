@@ -33,7 +33,7 @@ def get_activation_key():
             f.write(key)
         return key
 
-def check_license(server_url, timeout=5):
+def check_license(server_url, sw_name=None, sw_version=None, timeout=5):
     """
     Check the license validity with the licensing server.
     """
@@ -44,7 +44,9 @@ def check_license(server_url, timeout=5):
             server_url + '/check_license',
             params={
                 'hash': unique_hash,
-                'key': activation_key
+                'key': activation_key,
+                'sw_name': sw_name,
+                'sw_version': sw_version
                 },
             timeout=timeout)
         status = response.status_code
